@@ -1,0 +1,14 @@
+{
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "dsznajder.es7-react-js-snippets",
+        "ms-playwright.playwright",
+        "yoavbls.pretty-ts-errors",
+        "tobealive.firebase-vscode",
+        "GitHub.vscode-pull-request-github",
+        "cschleiden.vscode-github-actions",
+        "eamodio.gitlens"
+    ]
+}
