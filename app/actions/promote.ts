@@ -1,6 +1,7 @@
 'use server';
 
 import { getAdminDb } from '@/lib/admin';
+import { generateFingerprint } from '@/lib/mapping';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export interface PromoteResult {
@@ -31,23 +32,27 @@ export async function promoteEventAction(draftId: string): Promise<PromoteResult
     const title = draftData.Title || '';
     const date = draftData.Event_Date || '';
     const venue = draftData.Venue_Name || '';
-    const fingerprint = draftData.Fingerprint ||
-      `${title}|${date}|${venue}`.replace(/\s+/g, '_').toLowerCase();
+    const fingerprint = draftData.Fingerprint || generateFingerprint(title, date, venue);
 
-    // 3. Write to ama_events (production)
+    // 3. Atomic promote: write to ama_events AND delete from staging_drafts
+    //    in a single batch to prevent the event existing in both collections
+    //    if the process crashes between operations.
     const eventRef = db.collection('ama_events').doc(fingerprint);
-    await eventRef.set({
+    const batch = db.batch();
+
+    batch.set(eventRef, {
       ...draftData,
       id: fingerprint,
       fingerprint: fingerprint,
+      is_approved: true,
       status: 'published',
       Review_Status: 'published',
       publishedAt: FieldValue.serverTimestamp(),
       origin_draft_id: draftId,
     }, { merge: true });
 
-    // 4. Clean up the draft
-    await draftRef.delete();
+    batch.delete(draftRef);
+    await batch.commit();
 
     return {
       success: true,
