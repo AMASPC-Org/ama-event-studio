@@ -1,7 +1,8 @@
 // ama-event-studio/lib/firebase.ts
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getFirestore, doc, getDoc, Firestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, Firestore } from "firebase/firestore";
 import { EventRecord } from "./types";
+import { mapDraftToRecord } from "./mapping";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -34,14 +35,38 @@ export async function getEventById(id: string): Promise<EventRecord | null> {
         return null;
     }
     try {
-        const docRef = doc(db, "events", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return { objectID: docSnap.id, ...docSnap.data() } as EventRecord;
+        // Check published events first
+        const pubRef = doc(db, "ama_events", id);
+        const pubSnap = await getDoc(pubRef);
+        if (pubSnap.exists()) {
+            return mapDraftToRecord(pubSnap.id, pubSnap.data());
         }
+
+        // Check staging_drafts
+        const draftRef = doc(db, "staging_drafts", id);
+        const draftSnap = await getDoc(draftRef);
+        if (draftSnap.exists()) {
+            return mapDraftToRecord(draftSnap.id, draftSnap.data());
+        }
+
         return null;
     } catch (error) {
         console.error("Error fetching event:", error);
         return null;
+    }
+}
+
+/**
+ * Fetches all pending drafts from the staging_drafts collection.
+ */
+export async function getDrafts(): Promise<EventRecord[]> {
+    if (!db) return [];
+    try {
+        const q = query(collection(db, "staging_drafts"), where("Review_Status", "==", "pending"));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => mapDraftToRecord(doc.id, doc.data()));
+    } catch (error) {
+        console.error("Error fetching drafts:", error);
+        return [];
     }
 }
