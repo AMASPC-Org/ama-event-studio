@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import { ArrowLeft, Edit, Trash2, Calendar, MapPin, Tag, Users, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Calendar, MapPin, Tag, Users, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { getEventById } from '@/lib/firebase';
 import { IS_MOCK_MODE } from '@/lib/algolia';
 import { MOCK_EVENTS } from '@/lib/mock-data';
 import NextImage from 'next/image';
 import { TYPE_COLORS } from '@/lib/constants';
 import { EventRecord } from '@/lib/types';
+import ApproveButton from '@/components/ApproveButton';
 
 export default async function EventDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -68,6 +69,11 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ i
                                         <ShieldCheck size={12} /> Approved
                                     </span>
                                 )}
+                                {event.reviewStatus === 'pending' && (
+                                    <span className="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded shadow-sm flex items-center gap-1 uppercase tracking-tighter">
+                                        <AlertTriangle size={12} /> Needs Review
+                                    </span>
+                                )}
                             </div>
                             <h1 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-2">
                                 {event.event_name}
@@ -88,6 +94,9 @@ export default async function EventDetailsPage({ params }: { params: Promise<{ i
                             </div>
                         </div>
                         <div className="flex gap-3">
+                            {event.reviewStatus === 'pending' && (
+                                <ApproveButton draftId={event.objectID} />
+                            )}
                             <button className="px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-100 transition-colors flex items-center gap-2 shadow-sm min-h-[44px]">
                                 <Edit size={16} /> Edit Details
                             </button>

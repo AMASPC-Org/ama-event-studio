@@ -1,7 +1,7 @@
 // ama-event-studio/components/EventCard.tsx
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar, AlertTriangle } from 'lucide-react';
 import { EventRecord } from '@/lib/types';
 import { TYPE_COLORS } from '@/lib/constants';
 import { twMerge } from 'tailwind-merge';
@@ -33,6 +33,11 @@ export function EventCard({ hit }: EventCardProps) {
                     <span className={twMerge("px-2 py-0.5 backdrop-blur text-[10px] font-bold rounded shadow-sm uppercase tracking-tighter", typeStyle)}>
                         {hit.event_type || 'Event'}
                     </span>
+                    {hit.reviewStatus === 'pending' && (
+                        <span className="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded shadow-sm uppercase tracking-tighter flex items-center gap-0.5">
+                            <AlertTriangle size={10} /> Review
+                        </span>
+                    )}
                 </div>
             </div>
 

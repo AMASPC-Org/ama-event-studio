@@ -1,4 +1,12 @@
-import { EventRecord, ScraperDraft } from './types';
+import { EventRecord } from './types';
+
+/**
+ * Generates a consistent fingerprint ID from event fields: Title|Date|Venue.
+ * This is the single source of truth for document IDs across staging and production.
+ */
+export function generateFingerprint(title: string, date: string, venue: string): string {
+  return `${title}|${date}|${venue}`.replace(/\s+/g, '_').toLowerCase();
+}
 
 /**
  * Normalizes a raw ScraperDraft (PascalCase from ingestion) into a Studio EventRecord.
@@ -15,7 +23,7 @@ export function mapDraftToRecord(id: string, data: any): EventRecord {
   const event_date_label = date ? `${date} ${time}`.trim() : (data.event_date_label || 'Date TBD');
 
   // Re-calculate fingerprint to ensure consistency (Title|Date|Venue)
-  const fingerprint = data.Fingerprint || `${title}|${date}|${venue}`.replace(/\s+/g, '_').toLowerCase();
+  const fingerprint = data.Fingerprint || generateFingerprint(title, date, venue);
 
   return {
     objectID: id,
@@ -28,8 +36,8 @@ export function mapDraftToRecord(id: string, data: any): EventRecord {
     audience_segment: data.audience_segment || [],
     persona: data.persona || [],
     source: data.Source_Url || data.source || '',
-    is_approved: data.Review_Status === 'approved' || !!data.is_approved,
-    reviewStatus: data.Review_Status || 'pending',
+    is_approved: data.Review_Status === 'approved' || data.Review_Status === 'published' || !!data.is_approved,
+    reviewStatus: data.Review_Status || data.reviewStatus || 'pending',
     fingerprint: fingerprint,
     publishedAt: data.publishedAt || null,
     publishedBy: data.publishedBy || null

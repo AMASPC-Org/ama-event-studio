@@ -13,7 +13,7 @@ export interface EventRecord extends BaseHit {
     persona: string[];
     source: string;
     is_approved: boolean;
-    reviewStatus: 'pending' | 'approved' | 'rejected';
+    reviewStatus: 'pending' | 'approved' | 'rejected' | 'published';
     fingerprint?: string;
     publishedAt?: any;
     publishedBy?: string;
@@ -27,9 +27,10 @@ export interface ScraperDraft {
     Venue_Address?: string;
     Event_Date?: string;
     Event_Time?: string;
+    Event_Type?: string;
     Original_Image_Url?: string;
     Source_Url?: string;
-    Review_Status?: 'pending' | 'approved' | 'rejected';
+    Review_Status?: 'pending' | 'approved' | 'rejected' | 'published';
     Fingerprint?: string;
     Source?: string;
     Tags?: string[];

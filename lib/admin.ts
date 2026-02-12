@@ -1,6 +1,6 @@
 // ama-event-studio/lib/admin.ts
 // Server-side Firebase Admin SDK for Next.js Server Actions
-import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
+import { initializeApp, getApps, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 
 let adminApp: App;
